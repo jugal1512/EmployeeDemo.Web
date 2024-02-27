@@ -1,0 +1,10 @@
+﻿<script type="text/javascript">
+    $(document).ready(function () {
+        $("#image").change(function () {
+            const [file] = image.files;
+            if (file) {
+                previewImage.src = URL.createObjectURL(file);
+            }
+        });
+    });
+</script>
