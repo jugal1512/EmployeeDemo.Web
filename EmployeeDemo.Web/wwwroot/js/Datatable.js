@@ -79,7 +79,7 @@ function onSuccess(response) {
 }
 
 function format(data) {
-    return '<div class="mx-5">' + 
+    return '<div>' + 
         '<strong>DOB</strong>: ' + data.dob + '<br>' +
         '<strong>JoiningDate</strong>: ' + data.joiningDate + '<br>' +
         '<strong>Description</strong>: ' + data.description + '<br>' +
