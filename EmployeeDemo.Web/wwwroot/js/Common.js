@@ -17,12 +17,12 @@ $(document).ready(function () {
             hiddenSkill();
         });
     });
-    $(document).on('click', '.btnExpand', function () {
-             var hiddenRow = $(this).closest('tr').next('.hiddenRow');
-             hiddenRow.toggle();
-             let icon = $(this).find('i');
-             icon.toggleClass('fa-circle-plus fa-circle-minus');
-    });
+    //$(document).on('click', '.btnExpand', function () {
+    //         var hiddenRow = $(this).closest('tr').next('.hiddenRow');
+    //         hiddenRow.toggle();
+    //         let icon = $(this).find('i');
+    //         icon.toggleClass('fa-circle-plus fa-circle-minus');
+    //});
 });
 
 function updateSkills(item) {

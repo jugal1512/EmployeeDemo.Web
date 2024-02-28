@@ -5,78 +5,18 @@
     ViewData["Title"] = "Index";
 }
 
-<table id="DataTable" class="table text-center">
+<table id="DataTable" class="table">
     <thead>
         <tr>
-            <th>
-
-            </th>
-            <th>
-                Image
-            </th>
+            <th></th>
+            <th>Image</th>
             <th>Name</th>
-            @*<th>LastName</th>*@
             <th>Email</th>
-            <th>
-                Gender
-                @*@Html.DisplayNameFor(model => model.Email)*@
-            </th>
-            <th>
-                Designation
-                @*@Html.DisplayNameFor(model => model.Designation)*@
-            </th>
-            <th>
-                Action
-            </th>
+            <th>Gender</th>
+            <th>Designation</th>
+            <th>Action</th>
         </tr>
     </thead>
-    @*<tbody>
-    @foreach (var item in Model)
-    {
-    <tr>
-    <td>
-    <button class="btn btnExpand" type="button"><i class="fa-solid fa-circle-plus"></i></button>
-    </td>
-    <td>
-    <img src="~/uploads/@item.image" class="rounded-circle profileImage" height="50px" width="50px" />
-    </td>
-    <td>
-    @Html.DisplayFor(modelItem => item.FirstName) @Html.DisplayFor(modelItem => item.LastName)
-    </td>
-    <td>
-    @Html.DisplayFor(modelItem => item.Email)
-    </td>
-    <td>
-    @Html.DisplayFor(modelItem => item.Designation)
-    </td>
-    <td>
-    @Html.DisplayFor(modelItem => item.Gender)
-    </td>
-    <td>
-    @Html.ActionLink("Edit", "Edit", null, new { type="submit",id=item.Id  },new{@class="btn fa-solid fa-pen-to-square mx-2",@id="btnUpdate", @style="color: #e2bd03;"})
-    <a href="#" onclick=deleteSweetAlert('/employee/delete/@item.Id')><i class="fa-solid fa-trash" style="color: #e00b0b;"></i></a>
-    </td>
-    </tr>*@
-    @* <tr class="hiddenRow">
-    <td>
-    @Html.LabelFor(modelItem => item.Description) :-
-    @Html.DisplayFor(modelItem => item.Description)
-    </td>
-    <td>
-    @Html.LabelFor(modelItem => item.DOB) :-
-    @Html.DisplayFor(modelItem => item.DOB)
-    </td>
-    <td>
-    @Html.LabelFor(modelItem => item.JoiningDate) :-
-    @Html.DisplayFor(modelItem => item.JoiningDate)
-    </td>
-    <td>
-    @Html.LabelFor(modelItem => item.SkillName) :-
-    @Html.DisplayFor(modelItem => item.SkillName)
-    </td>
-    </tr>*@
-    }
-    @*</tbody>*@
 </table>
 
 @section scripts{

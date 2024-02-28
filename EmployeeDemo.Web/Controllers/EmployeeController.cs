@@ -31,21 +31,7 @@ namespace EmployeeDemo.Web.Controllers
             //var skillData = _mapper.Map<List<SkillDto>>(getSkill);
             //return Ok(skillData);
         }
-        public async Task<IActionResult> Index()
-        {
-                var getEmployee = await _employeesService.GetEmployees();
-                var employeedata = _mapper.Map<List<EmployeeDto>>(getEmployee);
-                return View(employeedata);
-        }
-
-        public async Task<IActionResult> getEmployeeList()
-        {
-            var getEmployee = await _employeesService.GetEmployees();
-            var employeedata = _mapper.Map<List<EmployeeDto>>(getEmployee);
-            return new JsonResult(employeedata);
-        }
-
-        public async Task<IActionResult> Search(string? searchString)
+        public async Task<IActionResult> Index(string? searchString)
         {
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -55,8 +41,17 @@ namespace EmployeeDemo.Web.Controllers
             }
             else
             {
-                return RedirectToAction("Index");    
+                var getEmployee = await _employeesService.GetEmployees();
+                var employeedata = _mapper.Map<List<EmployeeDto>>(getEmployee);
+                return View(employeedata);
             }
+        }
+
+        public async Task<IActionResult> getEmployeeList()
+        {
+            var getEmployee = await _employeesService.GetEmployees();
+            var employeedata = _mapper.Map<List<EmployeeDto>>(getEmployee);
+            return new JsonResult(employeedata);
         }
 
         public IActionResult Create()

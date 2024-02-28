@@ -1,11 +1,11 @@
-/*! DataTables 2.0.0
+/*! DataTables 2.0.1
  * © SpryMedia Ltd - datatables.net/license
  */
 
 /**
  * @summary     DataTables
  * @description Paginate, search and order HTML tables
- * @version     2.0.0
+ * @version     2.0.1
  * @author      SpryMedia Ltd
  * @contact     www.datatables.net
  * @copyright   SpryMedia Ltd.
@@ -2429,12 +2429,18 @@
 					else if ( typeof target === 'string' )
 					{
 						for ( k=0, kLen=columns.length ; k<kLen ; k++ ) {
-							if (target.indexOf(':name') !== -1) {
+							if (target === '_all') {
+								// Apply to all columns
+								fn( k, def );
+							}
+							else if (target.indexOf(':name') !== -1) {
+								// Column selector
 								if (columns[k].sName === target.replace(':name', '')) {
 									fn( k, def );
 								}
 							}
 							else {
+								// Cell selector
 								headerLayout.forEach(function (row) {
 									var cell = $(row[k].cell);
 	
@@ -2445,7 +2451,7 @@
 										target = '.' + target;
 									}
 	
-									if (target === '_all' || cell.is( target )) {
+									if (cell.is( target )) {
 										fn( k, def );
 									}
 								});
@@ -3030,7 +3036,7 @@
 			for ( i=0, iLen=oSettings.aoColumns.length ; i<iLen ; i++ )
 			{
 				oCol = oSettings.aoColumns[i];
-				create = nTrIn ? false : true;
+				create = nTrIn && anTds[i] ? false : true;
 	
 				nTd = create ? document.createElement( oCol.sCellType ) : anTds[i];
 	
@@ -3059,11 +3065,11 @@
 				}
 	
 				// Visibility - add or remove as required
-				if ( oCol.bVisible && ! nTrIn )
+				if ( oCol.bVisible && create )
 				{
 					nTr.appendChild( nTd );
 				}
-				else if ( ! oCol.bVisible && nTrIn )
+				else if ( ! oCol.bVisible && ! create )
 				{
 					nTd.parentNode.removeChild( nTd );
 				}
@@ -3147,14 +3153,23 @@
 		}
 	
 		// If no cells yet and we have content for them, then create
-		if ( $('th, td', target).length === 0 && (side === 'header' || _pluck(settings.aoColumns, titleProp).join('')) ) {
-			row = $('<tr/>')
-				.appendTo( target );
+		if (side === 'header' || _pluck(settings.aoColumns, titleProp).join('')) {
+			row = $('tr', target);
 	
-			for ( i=0, ien=columns.length ; i<ien ; i++ ) {
-				$('<th/>')
-					.html( columns[i][titleProp] || '' )
-					.appendTo( row );
+			// Add a row if needed
+			if (! row.length) {
+				row = $('<tr/>').appendTo(target)
+			}
+	
+			// Add the number of cells needed to make up to the number of columns
+			if (row.length === 1) {
+				var cells = $('td, th', row);
+	
+				for ( i=cells.length, ien=columns.length ; i<ien ; i++ ) {
+					$('<th/>')
+						.html( columns[i][titleProp] || '' )
+						.appendTo( row );
+				}
 			}
 		}
 	
@@ -3462,8 +3477,10 @@
 		var zero = oLang.sZeroRecords;
 		var dataSrc = _fnDataSource( settings );
 	
-		if ( settings.iDraw <= 1 && (dataSrc === 'ajax' || dataSrc === 'ssp') )
-		{
+		if (
+			(settings.iDraw < 1 && dataSrc === 'ssp') ||
+			(settings.iDraw <= 1 && dataSrc === 'ajax')
+		) {
 			zero = oLang.sLoadingRecords;
 		}
 		else if ( oLang.sEmptyTable && settings.fnRecordsTotal() === 0 )
@@ -3509,30 +3526,34 @@
 				'full' :
 				splitPos[1].toLowerCase();
 			var group = groups[ splitPos[0] ];
-	
-			// Transform to an object with a contents property
-			if ( $.isPlainObject( val ) ) {
-				// Already a group from a previous pass
-				if (val.contents) {
-					group[ align ] = val;
+			var groupRun = function (contents, innerVal) {
+				// If it is an object, then there can be multiple features contained in it
+				if ( $.isPlainObject( innerVal ) ) {
+					Object.keys(innerVal).map(function (key) {
+						contents.push( {
+							feature: key,
+							opts: innerVal[key]
+						});
+					});
 				}
 				else {
-					// For objects, each property becomes an entry in the contents
-					// array for this insert position
-					group[ align ] = {
-						contents: Object.keys(val).map(function (key) {
-							return {
-								feature: key,
-								opts: val[key]
-							};
-						})
-					};
+					contents.push(innerVal);
+				}
+			}
+	
+			// Transform to an object with a contents property
+			if (! group[align] || ! group[align].contents) {
+				group[align] = { contents: [] };
+			}
+	
+			// Allow for an array or just a single object
+			if ( Array.isArray(val)) {
+				for (var i=0 ; i<val.length ; i++) {
+					groupRun(group[align].contents, val[i]);
 				}
 			}
 			else {
-				group[ align ] = {
-					contents: val
-				};
+				groupRun(group[ align ].contents, val);
 			}
 	
 			// And make contents an array
@@ -4412,6 +4433,9 @@
 		if (typeof search !== 'string') {
 			search = search.toString();
 		}
+	
+		// Remove diacritics if normalize is set up to do so
+		search = _normalize(search);
 	
 		if (options.exact) {
 			return new RegExp(
@@ -5403,9 +5427,13 @@
 				// Allow the processing display to show
 				setTimeout( function () {
 					for ( var i=0, ien=columns.length ; i<ien ; i++ ) {
-						var append = e.shiftKey || i > 0;
-			
-						_fnSortAdd( settings, columns[i], append );
+						_fnSortAdd( settings, columns[i], i, e.shiftKey );
+	
+						// If the first entry is no sort, then subsequent
+						// sort columns are ignored
+						if (settings.aaSorting.length === 1 && settings.aaSorting[0][1] === '') {
+							break;
+						}
 					}
 	
 					_fnSort( settings );
@@ -5428,9 +5456,23 @@
 	function _fnSortDisplay(settings) {
 		var display = settings.aiDisplay;
 		var master = settings.aiDisplayMaster;
+		var masterMap = {};
+		var map = {};
+		var i;
 	
-		display.sort(function(a, b){  
-			return master.indexOf(a) - master.indexOf(b);
+		// Rather than needing an `indexOf` on master array, we can create a map
+		for (i=0 ; i<master.length ; i++) {
+			masterMap[master[i]] = i;
+		}
+	
+		// And then cache what would be the indexOf fom the display
+		for (i=0 ; i<display.length ; i++) {
+			map[display[i]] = masterMap[display[i]];
+		}
+	
+		display.sort(function(a, b){
+			// Short version of this function is simply `master.indexOf(a) - master.indexOf(b);`
+			return map[a] - map[b];
 		});
 	}
 	
@@ -5681,12 +5723,12 @@
 	 *  @param {object} settings dataTables settings object
 	 *  @param {node} attachTo node to attach the handler to
 	 *  @param {int} colIdx column sorting index
-	 *  @param {boolean} [append=false] Append the requested sort to the existing
-	 *    sort if true (i.e. multi-column sort)
+	 *  @param {int} addIndex Counter
+	 *  @param {boolean} [shift=false] Shift click add
 	 *  @param {function} [callback] callback function
 	 *  @memberof DataTable#oApi
 	 */
-	function _fnSortAdd ( settings, colIdx, append )
+	function _fnSortAdd ( settings, colIdx, addIndex, shift )
 	{
 		var col = settings.aoColumns[ colIdx ];
 		var sorting = settings.aaSorting;
@@ -5715,7 +5757,7 @@
 		}
 	
 		// If appending the sort then we are multi-column sorting
-		if ( append && settings.oFeatures.bSortMulti ) {
+		if ( (shift || addIndex) && settings.oFeatures.bSortMulti ) {
 			// Are we already doing some kind of sort on this column?
 			var sortIdx = _pluck(sorting, '0').indexOf(colIdx);
 	
@@ -5735,9 +5777,16 @@
 					sorting[sortIdx]._idx = nextSortIdx;
 				}
 			}
-			else {
-				// No sort on this column yet
+			else if (shift) {
+				// No sort on this column yet, being added by shift click
+				// add it as itself
 				sorting.push( [ colIdx, asSorting[0], 0 ] );
+				sorting[sorting.length-1]._idx = 0;
+			}
+			else {
+				// No sort on this column yet, being added from a colspan
+				// so add with same direction as first column
+				sorting.push( [ colIdx, sorting[0][1], 0 ] );
 				sorting[sorting.length-1]._idx = 0;
 			}
 		}
@@ -9390,6 +9439,8 @@
 				jqTable.append( tfoot );
 			}
 	
+			settings.colgroup.remove();
+	
 			settings.aaSorting = [];
 			settings.aaSortingFixed = [];
 			_fnSortingClasses( settings );
@@ -9489,7 +9540,7 @@
 	 *  @type string
 	 *  @default Version number
 	 */
-	DataTable.version = "2.0.0";
+	DataTable.version = "2.0.1";
 	
 	/**
 	 * Private data store, containing all of the settings objects that are
@@ -12234,7 +12285,7 @@
 	} );
 	
 	// Common function to remove new lines, strip HTML and diacritic control
-	var _filterString = function (stripHtml, diacritics) {
+	var _filterString = function (stripHtml, normalize) {
 		return function (str) {
 			if (_empty(str) || typeof str !== 'string') {
 				return str;
@@ -12246,8 +12297,8 @@
 				str = _stripHtml(str);
 			}
 	
-			if (diacritics) {
-				str = _normalize(str, true);
+			if (normalize) {
+				str = _normalize(str, false);
 			}
 	
 			return str;
