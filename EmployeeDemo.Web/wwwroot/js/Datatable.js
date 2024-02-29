@@ -57,7 +57,7 @@ function onSuccess(response) {
             {
                 data: 'Id',
                 render: function (data, type, row, meta) {
-                    return '<a href="/employee/upsert/' + row.id + '"><i class="fa-solid fa-pen-to-square mx-5" style="color:#e2bd03;"></i></a>' + " " + '<a onclick="deleteSweetAlert(\'/employee/delete/' + row.id + '\')"><i class="fa-solid fa-trash" style="color: #e00b0b;"></i ></a>'
+                    return '<a href="/employee/upsert/' + row.id + '"><i class="fa-solid fa-pen-to-square mx-5" style="color:#e2bd03;"></i></a>' + " " + '<a href="#" onclick=deleteSweetAlert("/employee/delete/' + row.id + '")><i class="fa-solid fa-trash" style="color: #e00b0b;"></i ></a>'
                 }
             },
         ]
@@ -79,10 +79,10 @@ function onSuccess(response) {
 }
 
 function format(data) {
-    return '<div>' + 
-        '<strong>DOB</strong>: ' + data.dob + '<br>' +
-        '<strong>JoiningDate</strong>: ' + data.joiningDate + '<br>' +
-        '<strong>Description</strong>: ' + data.description + '<br>' +
-        '<strong>SkillName</strong>: ' + data.skillName +
-        '</div>';
+    return '<tr>' + 
+        '<td><strong>DOB</strong>: ' + data.dob + "</td>" +
+        '<td><strong>JoiningDate</strong>: ' + data.joiningDate + "</td>" + 
+        '<td><strong>Description</strong>: ' + data.description + "</td>" +
+        '<td><strong>SkillName</strong>: ' + data.skillName + "</td>" +
+        '</tr>';
 }
