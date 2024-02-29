@@ -37,7 +37,7 @@ namespace EmployeeDemo.Web.Controllers
             {
                 var employee = await _employeesService.SearchEmployee(searchString);
                 var getEmployee = _mapper.Map<List<EmployeeDto>>(employee);
-                return View(getEmployee);
+                return new JsonResult(getEmployee);
             }
             else
             {
@@ -47,11 +47,20 @@ namespace EmployeeDemo.Web.Controllers
             }
         }
 
-        public async Task<IActionResult> getEmployeeList()
+        public async Task<IActionResult> getEmployeeList(string? searchString)
         {
-            var getEmployee = await _employeesService.GetEmployees();
-            var employeedata = _mapper.Map<List<EmployeeDto>>(getEmployee);
-            return new JsonResult(employeedata);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var employee = await _employeesService.SearchEmployee(searchString);
+                var getEmployee = _mapper.Map<List<EmployeeDto>>(employee);
+                return new JsonResult(getEmployee);
+            }
+            else
+            {
+                var getEmployee = await _employeesService.GetEmployees();
+                var employeedata = _mapper.Map<List<EmployeeDto>>(getEmployee);
+                return new JsonResult(employeedata);
+            } 
         }
 
         public IActionResult Create()
