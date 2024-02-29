@@ -57,7 +57,7 @@ function onSuccess(response) {
             {
                 data: 'Id',
                 render: function (data, type, row, meta) {
-                    return '<a href="/employee/edit/' + row.id + '"><i class="fa-solid fa-pen-to-square mx-5" style="color:#e2bd03;"></i></a>' + " " + '<a onclick="deleteSweetAlert(\'/employee/delete/' + row.id + '\')"><i class="fa-solid fa-trash" style="color: #e00b0b;"></i ></a>'
+                    return '<a href="/employee/upsert/' + row.id + '"><i class="fa-solid fa-pen-to-square mx-5" style="color:#e2bd03;"></i></a>' + " " + '<a onclick="deleteSweetAlert(\'/employee/delete/' + row.id + '\')"><i class="fa-solid fa-trash" style="color: #e00b0b;"></i ></a>'
                 }
             },
         ]

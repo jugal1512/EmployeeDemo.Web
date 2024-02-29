@@ -8,7 +8,7 @@
 <form class="employeeForm" method="post" enctype="multipart/form-data">
     <div class="border p-3 mt-4">
         <div class="row pb-2">
-            <h2 class="text-primary">Edit Employee</h2>
+            <h2 class="text-primary">@(Model != null?"Update":"Add") Employee</h2>
             </hr>
         </div>
         <div class="row g-3">
@@ -18,6 +18,7 @@
                         @Html.LabelFor(m => m.FirstName)
                     </div>
                     <div class="col-9">
+                        @Html.HiddenFor(m => m.Id)
                         @Html.TextBoxFor(m => m.FirstName)
                         @Html.ValidationMessageFor(m => m.FirstName, "", new { @class = "text-danger" })
                     </div>
@@ -102,9 +103,16 @@
                         @Html.LabelFor(m => m.image)
                     </div>
                     <div class="col-9">
-                        @Html.HiddenFor(m => m.image)
+                        @Html.HiddenFor(m => m.image,new {@id="hiddenImage"})
                         @Html.TextBoxFor(m => m.image ,new {type="file"})</br>
-                        <img id="previewImage" src="~/uploads/@Model.image" alt="Profile photo" height="100px" width="100px">
+                        @if (Model != null)
+                        {
+                            <img id="previewImage" src="~/uploads/@Model.image" alt="Profile photo" height="100px" width="100px">
+                        }
+                        else
+                        {
+                            <img id="previewImage" src="#" alt="Profile photo" height="100px" width="100px">
+                        }
                         @Html.ValidationMessageFor(m => m.image, "", new { @class = "text-danger" })
                     </div>
                 </div>
@@ -121,9 +129,12 @@
                         <input type="text" id="txtSkill">
                         <button type="button" id="btnAdd" class="p-2">Add</button>
                         <ul id="skillAdded">
-                            @foreach(var item in Model.AllSkill)
+                            @if (Model != null)
                             {
-                                <script>updateSkills(`@item`)</script>
+                                @foreach (var item in Model.AllSkill)
+                                {
+                                    <script>updateSkills(`@item`)</script>
+                                }
                             }
                         </ul>
                     </div>
@@ -150,4 +161,5 @@
 
 @section scripts{
     <partial name="_PreviewImage" />
+    <partial name="_ValidationScriptsPartial" />
     }
